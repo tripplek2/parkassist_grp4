@@ -6,10 +6,10 @@ from models import (
     ParkingRecord, BlockingIncident, Notification, MovementHistory
 )
 
-Global schema serialization engine instance
+#Global schema serialization engine instance
 ma = Marshmallow()
 
---- FOUNDATION SCHEMAS ---
+# --- FOUNDATION SCHEMAS ---
 class EstateSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Estate
@@ -30,7 +30,7 @@ class CheckpointSchema(ma.SQLAlchemyAutoSchema):
         load_instance = True
         sqla_session = db.session
 
---- USER & ACTOR SCHEMAS ---
+# --- USER & ACTOR SCHEMAS ---
 class UserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
@@ -62,7 +62,7 @@ class VisitorSchema(ma.SQLAlchemyAutoSchema):
 
 phone = fields.Str(required=True, validate=validate.Length(min=7, max=20))
 id_number = fields.Str(required=True, validate=validate.Length(min=4, max=50))
---- ASSET & LOGISTICS SCHEMAS ---
+# --- ASSET & LOGISTICS SCHEMAS ---
 class VehicleSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Vehicle
@@ -88,7 +88,7 @@ class ParkingRecordSchema(ma.SQLAlchemyAutoSchema):
         sqla_session = db.session
 
 status = fields.Str(validate=validate.OneOf(['Active', 'Completed']))
---- LOGGING & INCIDENT SCHEMAS ---
+# --- LOGGING & INCIDENT SCHEMAS ---
 class CheckpointLogSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = CheckpointLog
