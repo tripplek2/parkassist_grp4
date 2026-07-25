@@ -51,6 +51,7 @@ class User(db.Model):
 
 # Relationships
 checkpoint = db.relationship('Checkpoint', backref=db.backref('assigned_users'))
+
 class Resident(db.Model):
     """Represents property occupants who live inside a court"""
     tablename = 'residents'
@@ -65,6 +66,7 @@ class Resident(db.Model):
 
 # Relationships
 court = db.relationship('Court', backref=db.backref('residents', cascade='all, delete-orphan'))
+
 class Visitor(db.Model):
     """Represents temporary entries requested or hosted by a resident"""
     tablename = 'visitors'
@@ -104,6 +106,7 @@ created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 owner_resident = db.relationship('Resident', backref=db.backref('vehicles', cascade='all, delete-orphan'))
 owner_visitor = db.relationship('Visitor', backref=db.backref('vehicles', cascade='all, delete-orphan'))
 registered_by = db.relationship('User', backref=db.backref('registered_vehicles'))
+
 class ParkingSlot(db.Model):
     """Represents physical parking spaces assigned to specific courts"""
     tablename = 'parking_slots'
@@ -117,6 +120,7 @@ class ParkingSlot(db.Model):
 
 # Relationships
 court = db.relationship('Court', backref=db.backref('parking_slots', cascade='all, delete-orphan'))
+
 class ParkingRecord(db.Model):
     """Tracks historical and live sessions of vehicles using parking slots"""
     tablename = 'parking_records'
@@ -131,6 +135,7 @@ class ParkingRecord(db.Model):
 # Relationships
 parking_slot = db.relationship('ParkingSlot', backref=db.backref('records', cascade='all, delete-orphan'))
 vehicle = db.relationship('Vehicle', backref=db.backref('parking_records', cascade='all, delete-orphan'))
+
 class CheckpointLog(db.Model):
     """Logs every entry and exit event at a physical checkpoint"""
     tablename = 'checkpoint_logs'
@@ -147,6 +152,7 @@ class CheckpointLog(db.Model):
 checkpoint = db.relationship('Checkpoint', backref=db.backref('logs', cascade='all, delete-orphan'))
 vehicle = db.relationship('Vehicle', backref=db.backref('logs', cascade='all, delete-orphan'))
 user = db.relationship('User', backref=db.backref('logged_entries'))
+
 class BlockingIncident(db.Model):
     """Tracks security incidents where a vehicle is blocked by another"""
     tablename = 'blocking_incidents'
@@ -162,6 +168,7 @@ class BlockingIncident(db.Model):
 # Relationships
 reporting_resident = db.relationship('Resident', backref=db.backref('reported_incidents', cascade='all, delete-orphan'))
 blocked_vehicle = db.relationship('Vehicle', backref=db.backref('blocking_incidents', cascade='all, delete-orphan'))
+
 class Notification(db.Model):
     """System notifications dispatched to residents regarding visitors or incidents"""
     tablename = 'notifications'
@@ -176,6 +183,7 @@ class Notification(db.Model):
 
 # Relationships
 resident = db.relationship('Resident', backref=db.backref('notifications', cascade='all, delete-orphan'))
+
 class MovementHistory(db.Model):
     """An immutable data tracking layer for deep auditing of vehicle movements"""
     tablename = 'movement_history'
