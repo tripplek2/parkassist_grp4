@@ -131,3 +131,61 @@ class ParkingRecord(db.Model):
 # Relationships
 parking_slot = db.relationship('ParkingSlot', backref=db.backref('records', cascade='all, delete-orphan'))
 vehicle = db.relationship('Vehicle', backref=db.backref('parking_records', cascade='all, delete-orphan'))
+class CheckpointLog(db.Model):
+    """Logs every entry and exit event at a physical checkpoint"""
+    tablename = 'checkpoint_logs'
+
+    id = db.Column(db.Integer, primary_key=True)
+    checkpoint_id = db.Column(db.Integer, db.ForeignKey('checkpoints.id', ondelete='CASCADE'), nullable=False)
+    vehicle_id = db.Column(db.Integer, db.ForeignKey('vehicles.id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='SET NULL'), nullable=True) # Guard on duty
+    direction = db.Column(db.String(10), nullable=False) # 'IN' or 'OUT'
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    remarks = db.Column(db.String(255), nullable=True)
+
+# Relationships
+checkpoint = db.relationship('Checkpoint', backref=db.backref('logs', cascade='all, delete-orphan'))
+vehicle = db.relationship('Vehicle', backref=db.backref('logs', cascade='all, delete-orphan'))
+user = db.relationship('User', backref=db.backref('logged_entries'))
+class BlockingIncident(db.Model):
+    """Tracks security incidents where a vehicle is blocked by another"""
+    tablename = 'blocking_incidents'
+
+    id = db.Column(db.Integer, primary_key=True)
+    reporting_resident_id = db.Column(db.Integer, db.ForeignKey('residents.id', ondelete='CASCADE'), nullable=False)
+    blocked_vehicle_id = db.Column(db.Integer, db.ForeignKey('vehicles.id', ondelete='CASCADE'), nullable=False)
+    description = db.Column(db.String(255), nullable=True)
+    status = db.Column(db.String(20), default='Open', nullable=False) # 'Open', 'Resolved', 'Escalated'
+    resolved_at = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+# Relationships
+reporting_resident = db.relationship('Resident', backref=db.backref('reported_incidents', cascade='all, delete-orphan'))
+blocked_vehicle = db.relationship('Vehicle', backref=db.backref('blocking_incidents', cascade='all, delete-orphan'))
+class Notification(db.Model):
+    """System notifications dispatched to residents regarding visitors or incidents"""
+    tablename = 'notifications'
+
+    id = db.Column(db.Integer, primary_key=True)
+    resident_id = db.Column(db.Integer, db.ForeignKey('residents.id', ondelete='CASCADE'), nullable=False)
+    title = db.Column(db.String(100), nullable=False)
+    message = db.Column(db.String(500), nullable=False)
+    type = db.Column(db.String(30), nullable=False) # e.g., 'Incident', 'Parking', 'Visitor Access'
+    is_read = db.Column(db.Boolean, default=False, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+# Relationships
+resident = db.relationship('Resident', backref=db.backref('notifications', cascade='all, delete-orphan'))
+class MovementHistory(db.Model):
+    """An immutable data tracking layer for deep auditing of vehicle movements"""
+    tablename = 'movement_history'
+
+    id = db.Column(db.Integer, primary_key=True)
+    vehicle_id = db.Column(db.Integer, db.ForeignKey('vehicles.id', ondelete='CASCADE'), nullable=False)
+    checkpoint_log_id = db.Column(db.Integer, db.ForeignKey('checkpoint_logs.id', ondelete='CASCADE'), nullable=False)
+    action_type = db.Column(db.String(20), nullable=False) # 'Entry', 'Exit', 'Flagged'
+    archived_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+# Relationships
+vehicle = db.relationship('Vehicle', backref=db.backref('movement_histories', cascade='all, delete-orphan'))
+checkpoint_log = db.relationship('CheckpointLog', backref=db.backref('archived_movements', cascade='all, delete-orphan'))
